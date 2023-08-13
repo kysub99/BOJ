@@ -1,39 +1,49 @@
 #include <iostream>
-#include <vector>
 #include <algorithm>
-#include <map>
+#include <vector>
 using namespace std;
 
-long long arr[100000];
-int n;
+vector<long long> arr;
 
-long long divide(int s, int e) {
-    if (s == e) {
-        return arr[s];
+long long divide(int l, int r) {
+    if (l == r) {
+        return arr[l];
     }
-    int min_idx = s;
-    for (int i = s + 1; i <= e; i++) {
-        if (arr[min_idx] > arr[i]) {
-            min_idx = i;
+    long long m = (l + r) / 2;
+    long long lw = divide(l, m);
+    long long rw = divide(m + 1, r);
+    long long li = m;
+    long long ri = m + 1;
+    long long h = min(arr[li], arr[ri]);
+    long long cw = 2 * h;
+    while (l < li || ri < r) {
+        if (ri < r && (l == li || arr[li - 1] < arr[ri + 1])) {
+            ri++;
+            h = min(h, arr[ri]);
         }
+        else {
+            li--;
+            h = min(h, arr[li]);
+        }
+        cw = max(cw, h * (ri - li + 1));
     }
-    long long left_area = min_idx == s ? 0 : divide(s, min_idx - 1);
-    long long right_area = min_idx == e ? 0 : divide(min_idx + 1, e);
-    long long middle_area = (e - s + 1) * arr[min_idx];
-
-    return max({ left_area, right_area, middle_area });
+    long long maxW = max({ lw, cw, rw });
+    return maxW;
 }
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(NULL);
     while (1) {
+        int n;
         cin >> n;
         if (n == 0)
-            break;
+            return 0;
+        arr.resize(n);
         for (int i = 0; i < n; i++) {
             cin >> arr[i];
         }
-        cout << divide(0, n - 1) << "\n";
+        long long res = divide(0, n - 1);
+        cout << res << "\n";
     }
 }
